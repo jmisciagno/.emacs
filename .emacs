@@ -33,17 +33,9 @@
 (global-set-key (kbd "M-x") 'helm-M-x)
 (global-set-key (kbd "C-x C-b") 'helm-buffers-list)
 
-; Open Application
-(global-set-key (kbd "C-c a") (lambda () (interactive) (helm :sources '(helm-open-application))))
-(setq helm-open-application
-      `((name . "Open Application")
-        (candidates . ,(mapcar #'file-name-base (helm-list-directory "/Applications/")))
-        (action . (lambda (candidate) (shell-command (concat "open -a \"" candidate ".app\""))))))
-
-; Open files externally
+; Open file externally
 (global-set-key (kbd "C-c o") 'open-buffer-file-name-externally)
 (define-key helm-find-files-map (kbd "C-c o") 'helm-ff-run-open-file-externally)
-
 (defun open-buffer-file-name-externally ()
   (interactive)
   (if buffer-file-name
@@ -53,6 +45,25 @@
 	      ((not (cdr res)) (princ "Emacs is the default program."))
 	      (t (shell-command (concat (cdr res) " \"" buffer-file-name "\"")))))
       (princ "Failed to open.  The current bufffer is not a file.")))
+
+; Filter Files
+(setq helm-ignore-files-list (list ".DS_Store" ".localized"))
+(defun helm-filter-files (files)
+  (seq-filter
+   (lambda (f)
+     (let ((name (file-name-nondirectory f)))
+       (not (member name helm-ignore-files-list))))
+   files))
+
+; Open Application
+(global-set-key (kbd "C-c a") (lambda () (interactive) (helm :sources '(helm-open-application))))
+(setq helm-open-application
+      `((name . "Open Application")
+        (candidates . ,(mapcar #'file-name-base (helm-filter-files (helm-list-directory "/Applications/"))))
+        (action . (lambda (candidate) (shell-command (concat "open -a \"" candidate ".app\""))))))
+
+; Adjust Directory
+(advice-add 'helm-list-directory :filter-return #'helm-filter-files)
 
 ;;; highlight line configuration
 (require 'hl-line)
