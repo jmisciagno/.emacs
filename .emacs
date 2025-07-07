@@ -19,7 +19,6 @@
 (scroll-bar-mode -1)
 (display-time)
 (setq initial-scratch-message "")
-;(setq glyphless-char-display 'empty-box) ;; causes problems with list-packages and kill-emacs
 (setq inhibit-startup-message t)
 (fset 'yes-or-no-p 'y-or-n-p)
 (setq auto-save-default nil)
@@ -28,6 +27,7 @@
 (require 'helm)
 (require 'helm-find)
 (require 'helm-command)
+
 (define-key helm-find-files-map (kbd "C-c C-x") nil) ; remove binding
 (global-set-key (kbd "C-x C-f") 'helm-find-files)
 (global-set-key (kbd "M-x") 'helm-M-x)
@@ -65,6 +65,33 @@
 ; Adjust Directory
 (advice-add 'helm-list-directory :filter-return #'helm-filter-files)
 
+;;; Flyspell
+(require 'helm-flyspell)
+(setq ispell-program-name "/usr/local/bin/aspell")
+(add-hook 'org-mode-hook 'flyspell-mode)
+(add-hook 'text-mode-hook 'flyspell-mode)
+(define-key flyspell-mode-map (kbd "C-c 7") 'helm-flyspell-buffer)
+(add-hook 'flyspell-mode-hook #'flyspell-buffer)
+
+
+(setq helm-flyspell-continue-p t)
+
+(defun helm-flyspell-quit ()
+  (setq helm-flyspell-continue-p nil))
+
+(advice-add 'helm-keyboard-quit :before #'helm-flyspell-quit)
+
+(defun helm-flyspell-buffer ()
+  (interactive)
+  (save-excursion
+    (progn
+      (setq helm-flyspell-continue-p t)
+      (while helm-flyspell-continue-p
+	(progn
+	  (helm-flyspell-correct)
+	  (when (stringp (flyspell-goto-next-error))
+	        (helm-flyspell-quit)))))))
+  
 ;;; highlight line configuration
 (require 'hl-line)
 (setq cursor-type nil)
@@ -332,7 +359,7 @@
      ("pdf" . "open -a Preview")
      ("png" . "open -a Preview")
      ("jpeg" . "open -a Preview")))
- '(package-selected-packages '(helm-core tuareg helm)))
+ '(package-selected-packages '(helm-flyspell helm-core tuareg helm)))
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.
