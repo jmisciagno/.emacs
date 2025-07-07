@@ -15,7 +15,6 @@
 (add-to-list 'load-path "~/Emacs/gforth")
 (add-to-list 'load-path "~/Emacs/matlab")
 
-
 ;;; open Emacs
 (scroll-bar-mode -1)
 (display-time)
@@ -39,7 +38,7 @@
 (setq helm-open-application
       `((name . "Open Application")
         (candidates . ,(mapcar #'file-name-base (helm-list-directory "/Applications/")))
-        (action . (lambda (candidate) (shell-command (concat "open -a " candidate ".app"))))))
+        (action . (lambda (candidate) (shell-command (concat "open -a \"" candidate ".app\""))))))
 
 ; Open files externally
 (global-set-key (kbd "C-c o") 'open-buffer-file-name-externally)
