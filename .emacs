@@ -104,13 +104,13 @@
 (require 'langtool)
 (setq langtool-bin "/usr/local/bin/languagetool")
 (setq langtool-default-language "en-US")
+(setq langtool-disabled-rules (list "MORFOLOGIK_RULE_EN_US"))
 (add-hook 'text-mode-hook (lambda () (interactive) (setq langtool-auto-check nil) (langtool-check-buffer) (princ "")))
 (add-hook 'langtool-error-exists-hook (lambda () (interactive) (progn (when langtool-auto-check (langtool-interactive-correction)) (princ ""))))
 (define-key flyspell-mode-map (kbd "C-c 8") (lambda () (interactive) (princ "Checking grammar...") (setq langtool-auto-check t) (langtool-check-buffer) (princ "")))
 (set-face-attribute 'langtool-errline nil :background "light green")
 (set-face-attribute 'langtool-correction-face nil :background nil :foreground "black" :weight 'normal)
-
-(set-face-attribute 'langtool-errline nil :background nil :underline '(:color "green4" :style wave))
+; (set-face-attribute 'langtool-errline nil :background nil :underline '(:color "green4" :style wave))
 
 ;;; highlight line configuration
 (require 'hl-line)
