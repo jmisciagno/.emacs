@@ -14,6 +14,8 @@
 (add-to-list 'load-path "~/Emacs")
 (add-to-list 'load-path "~/Emacs/gforth")
 (add-to-list 'load-path "~/Emacs/matlab")
+(add-to-list 'load-path "~/Emacs/langtool")
+(add-to-list 'load-path "~/Emacs/flymake-languagetool")
 
 ;;; open Emacs
 (scroll-bar-mode -1)
@@ -65,33 +67,49 @@
 ; Adjust Directory
 (advice-add 'helm-list-directory :filter-return #'helm-filter-files)
 
+
 ;;; Flyspell
-(require 'helm-flyspell)
+(require 'flyspell)
 (setq ispell-program-name "/usr/local/bin/aspell")
-(add-hook 'org-mode-hook 'flyspell-mode)
 (add-hook 'text-mode-hook 'flyspell-mode)
-(define-key flyspell-mode-map (kbd "C-c 7") 'helm-flyspell-buffer)
-(add-hook 'flyspell-mode-hook #'flyspell-buffer)
+(define-key flyspell-mode-map (kbd "C-c 7") 'ispell)
+(define-key flyspell-mode-map (kbd "C-g") 'keyboard-quit)
+(add-hook 'flyspell-mode-hook 'flyspell-buffer); check spelling on open
 
+;;; DO NOT DELETE
+;;; helm-flyspell
+;; (require 'helm-flyspell)
+;; (define-key flyspell-mode-map (kbd "C-c 7") 'helm-flyspell-buffer)
+;; (advice-add 'helm-keyboard-quit :before #'helm-flyspell-quit)
 
-(setq helm-flyspell-continue-p t)
+;; (defun helm-flyspell-quit ()
+;;   (setq helm-flyspell-continue-p nil))
 
-(defun helm-flyspell-quit ()
-  (setq helm-flyspell-continue-p nil))
+;; (defun helm-flyspell-buffer ()
+;;   (interactive)
+;;   (save-excursion
+;;     (progn
+;;       (setq helm-flyspell-continue-p t)
+;;       (while helm-flyspell-continue-p
+;; 	(progn
+;; 	  (helm-flyspell-correct)
+;; 	  (forward-word)
+;; 	  (when (stringp (flyspell-goto-next-error))
+;; 	        (helm-flyspell-quit)))))))
+;;; DO NOT DELETE
 
-(advice-add 'helm-keyboard-quit :before #'helm-flyspell-quit)
+;;; Langtool
+(require 'langtool)
+(setq langtool-bin "/usr/local/bin/languagetool")
+(setq langtool-default-language "en-US")
+(add-hook 'text-mode-hook (lambda () (interactive) (setq langtool-auto-check nil) (langtool-check-buffer) (princ "")))
+(add-hook 'langtool-error-exists-hook (lambda () (interactive) (progn (when langtool-auto-check (langtool-interactive-correction)) (princ ""))))
+(define-key flyspell-mode-map (kbd "C-c 8") (lambda () (interactive) (princ "Checking grammar...") (setq langtool-auto-check t) (langtool-check-buffer) (princ "")))
+(set-face-attribute 'langtool-errline nil :background "light green")
+(set-face-attribute 'langtool-correction-face nil :background nil :foreground "black" :weight 'normal)
 
-(defun helm-flyspell-buffer ()
-  (interactive)
-  (save-excursion
-    (progn
-      (setq helm-flyspell-continue-p t)
-      (while helm-flyspell-continue-p
-	(progn
-	  (helm-flyspell-correct)
-	  (when (stringp (flyspell-goto-next-error))
-	        (helm-flyspell-quit)))))))
-  
+;(set-face-attribute 'langtool-errline nil :background nil :underline '(:color "green4" :style wave))
+
 ;;; highlight line configuration
 (require 'hl-line)
 (setq cursor-type nil)
@@ -359,7 +377,7 @@
      ("pdf" . "open -a Preview")
      ("png" . "open -a Preview")
      ("jpeg" . "open -a Preview")))
- '(package-selected-packages '(helm-flyspell helm-core tuareg helm)))
+ '(package-selected-packages '(langtool helm-flyspell helm-core tuareg helm)))
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.
