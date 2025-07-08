@@ -77,8 +77,10 @@
 (add-hook 'flyspell-mode-hook 'flyspell-buffer); check spelling on open
 
 ;;; DO NOT DELETE
-;;; helm-flyspell
 ;; (require 'helm-flyspell)
+;; (setq ispell-program-name "/usr/local/bin/aspell")
+;; (add-hook 'text-mode-hook 'flyspell-mode)
+;; (add-hook 'flyspell-mode-hook 'flyspell-buffer); check spelling on open
 ;; (define-key flyspell-mode-map (kbd "C-c 7") 'helm-flyspell-buffer)
 ;; (advice-add 'helm-keyboard-quit :before #'helm-flyspell-quit)
 
@@ -108,7 +110,7 @@
 (set-face-attribute 'langtool-errline nil :background "light green")
 (set-face-attribute 'langtool-correction-face nil :background nil :foreground "black" :weight 'normal)
 
-;(set-face-attribute 'langtool-errline nil :background nil :underline '(:color "green4" :style wave))
+(set-face-attribute 'langtool-errline nil :background nil :underline '(:color "green4" :style wave))
 
 ;;; highlight line configuration
 (require 'hl-line)
