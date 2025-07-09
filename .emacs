@@ -139,7 +139,17 @@
 (add-hook 'text-mode-hook #'langtool-check-buffer-no-interactive) ; check on startup
 (add-hook 'after-save-hook (lambda () (interactive) (when (derived-mode-p 'text-mode) (langtool-check-buffer-no-interactive)))) ; check on save
 (define-key text-mode-map (kbd "C-c 8") #'langtool-check-buffer-with-interactive) ; check and make corrections on command
-; (fset 'langtool-simple-error-message 'my-langtool-simple-error-message) ; simplify or hush messages
+(fset 'langtool-simple-error-message 'my-langtool-simple-error-message) ; simplify or hush messages
+(defun my-langtool-simple-error-message (overlays)
+  "Textify error messages as long as simple."
+  (mapconcat
+   (lambda (ov)
+     (format
+      "%s [%s]"
+      (overlay-get ov 'langtool-simple-message)
+      (overlay-get ov 'langtool-rule-id)))
+   overlays "\n"))
+
 ;; (defun my-langtool-simple-error-message (overlays)
 ;;   "Textify error messages as long as simple."
 ;;   (mapconcat
