@@ -137,7 +137,7 @@
 (setq langtool-bin "/usr/local/bin/languagetool")
 (setq langtool-default-language "en-US")
 (setq langtool-disabled-rules (list "MORFOLOGIK_RULE_EN_US"))
-(set-face-attribute 'langtool-errline nil :background "light green")
+(set-face-attribute 'langtool-errline nil :background "pale green")
 (set-face-attribute 'langtool-correction-face nil :background nil :foreground "black" :weight 'normal)
 ; (set-face-attribute 'langtool-errline nil :background nil :underline '(:color "green4" :style wave))
 (add-hook 'text-mode-hook #'langtool-check-buffer-no-interactive) ; check on startup
@@ -172,7 +172,8 @@
 	(setq langtool-auto-check t)
 	(princ ""))
     (progn
-      (langtool-interactive-correction))))
+      (langtool-interactive-correction)
+      (princ ""))))
 
 (defun langtool-check-buffer-no-interactive ()
   (interactive)
