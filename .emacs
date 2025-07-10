@@ -18,7 +18,6 @@
 (add-to-list 'load-path "~/Emacs/gforth")
 (add-to-list 'load-path "~/Emacs/matlab")
 (add-to-list 'load-path "~/Emacs/langtool")
-(exec-path-from-shell-initialize)
 
 ;;; open Emacs
 (scroll-bar-mode -1)
@@ -27,6 +26,13 @@
 (setq inhibit-startup-message t)
 (fset 'yes-or-no-p 'y-or-n-p)
 (setq auto-save-default nil)
+
+(require 'my-mode)
+(add-hook 'my-mode-hook (lambda () (interactive) (princ "Welcome to My Mode")))
+(add-to-list 'auto-mode-alist '("\\.mine\\'" . my-mode))
+
+;;; Set $PATH
+(exec-path-from-shell-initialize)
 
 ;;; Helm
 (require 'helm)
@@ -108,6 +114,8 @@
 ;; 	        (helm-flyspell-quit)))))))
 ;;; DO NOT DELETE
 
+;(require 'language-mode)
+;(add-to-list 'auto-mode-alist '("\\.lang\\'" . language-mode))
 
 ;;; Flyspell for Spell Checking
 (require 'flyspell)
@@ -150,7 +158,8 @@ for the overlay."
 (setq langtool-default-language "en-US")
 (setq langtool-disabled-rules (list "MORFOLOGIK_RULE_EN_US")) ; disable spell check
 (set-face-attribute 'langtool-correction-face nil :background nil :foreground "black" :weight 'normal)
-(set-face-attribute 'langtool-errline nil :background "pale green")
+;(set-face-attribute 'langtool-errline nil :background "pale green")
+(set-face-attribute 'langtool-errline nil :background nil :underline '(:color "green4" :style wave))
 (add-hook 'text-mode-hook #'langtool-check-buffer-no-interactive) ; check on startup
 (add-hook 'after-save-hook (lambda () (interactive) (when (derived-mode-p 'text-mode) (langtool-check-buffer-no-interactive)))) ; check on save
 (define-key text-mode-map (kbd "C-c 8") #'langtool-check-buffer-with-interactive) ; check and make corrections on command
@@ -197,7 +206,7 @@ for the overlay."
   (langtool-check-buffer-safe)
   (princ ""))
 
-;;; Flycheck with Vale for Linting
+;; ;;; Flycheck with Vale for Linting
 (require 'vale-mode)
 (require 'flycheck)
 (add-hook 'text-mode-hook 'flycheck-mode)
@@ -205,6 +214,7 @@ for the overlay."
 (setq flycheck-auto-display-errors-after-checking nil)
 (fset 'flycheck-help-echo (lambda (_window object pos) "")) ;; Disable mouse-over message
 (set-face-attribute 'flycheck-error nil :background nil :underline '(:color "blue" :style wave))
+(setq flycheck-mode-line '(:eval " FlyC"))
 
 (flycheck-define-checker vale
   "A checker for prose"
@@ -216,7 +226,6 @@ for the overlay."
   :modes (markdown-mode org-mode text-mode)
   )
 (add-to-list 'flycheck-checkers 'vale 'append)
-
 
 ;;; highlight line configuration
 (require 'hl-line)
@@ -486,4 +495,4 @@ for the overlay."
      ("png" . "open -a Preview")
      ("jpeg" . "open -a Preview")))
  '(package-selected-packages
-   '(yaml exec-path-from-shell flycheck-vale vale-mode langtool helm-flyspell helm-core tuareg helm)))
+   '(yaml exec-path-from-shell flycheck-vale helm-flyspell helm-core tuareg helm)))
