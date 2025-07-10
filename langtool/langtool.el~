@@ -1311,11 +1311,11 @@ Ordinary no need to change this."
           (propertize ":run" 'face compilation-info-face))
     (setq langtool-mode-line-message
 	  (if (derived-mode-p 'language-mode)
-	  (list "")
           (list " "
 		"LT"                    ; LT <= LanguageTool shorthand
                 'langtool-mode-line-server-process
-                'langtool-mode-line-process)))))
+                'langtool-mode-line-process)
+	  (list "")))))
   
 
 (defun langtool--cleanup-process ()
