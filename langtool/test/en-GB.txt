@@ -1,3 +1,0 @@
--*- langtool-default-language: en-GB -*-
-
-Some text contents.
