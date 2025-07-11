@@ -1,8 +1,21 @@
 ;;;;;;;;;;;;;;;;;;;; global ;;;;;;;;;;;;;;;;;;;;;
 
-(tool-bar-mode -1)
+;;; Debug behavior
 (setq debug-on-error t)
 
+;;; open Emacs
+(set-frame-height (selected-frame) 60)
+(set-frame-width (selected-frame) 120)
+(set-frame-position (selected-frame) 315 25)
+(scroll-bar-mode -1)
+(tool-bar-mode -1)
+(setq initial-scratch-message "")
+(setq inhibit-startup-message t)
+(setq auto-save-default nil)
+(display-time)
+(fset 'yes-or-no-p 'y-or-n-p)
+
+;;; Packages
 (require 'package)
 (setq package-archives '(("org"       . "http://orgmode.org/elpa/")
 			 ("gnu"       . "http://elpa.gnu.org/packages/")
@@ -19,14 +32,9 @@
 (add-to-list 'load-path "~/Emacs/matlab")
 (add-to-list 'load-path "~/Emacs/langtool")
 (add-to-list 'load-path "~/Emacs/writer")
+(add-to-list 'load-path "~/Emacs/language-mode")
 
-;;; open Emacs
-(scroll-bar-mode -1)
-(display-time)
-(setq initial-scratch-message "")
-(setq inhibit-startup-message t)
-(fset 'yes-or-no-p 'y-or-n-p)
-(setq auto-save-default nil)
+
 
 (require 'my-mode)
 (add-hook 'my-mode-hook (lambda () (interactive) (princ "Welcome to My Mode")))
@@ -50,6 +58,7 @@
 (global-set-key (kbd "M-x") 'helm-M-x)
 (global-set-key (kbd "C-x C-b") 'helm-buffers-list)
 (set-face-attribute 'helm-ff-directory nil :background "antique white" :foreground "DarkRed")
+(setq delete-by-moving-to-trash t) ; move files to trash
 
 ; Open file externally
 (global-set-key (kbd "C-c o") 'open-buffer-file-name-externally)
