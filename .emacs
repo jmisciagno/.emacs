@@ -18,6 +18,7 @@
 (add-to-list 'load-path "~/Emacs/gforth")
 (add-to-list 'load-path "~/Emacs/matlab")
 (add-to-list 'load-path "~/Emacs/langtool")
+(add-to-list 'load-path "~/Emacs/writer")
 
 ;;; open Emacs
 (scroll-bar-mode -1)
@@ -33,6 +34,11 @@
 
 ;;; Set $PATH
 (exec-path-from-shell-initialize)
+
+(require 'writer)
+(add-hook 'org-mode-hook
+	  (lambda ()
+	    (define-key org-mode-map (kbd "C-c w") #'writer-mode)))
 
 ;;; Helm
 (require 'helm)
@@ -114,118 +120,120 @@
 ;; 	        (helm-flyspell-quit)))))))
 ;;; DO NOT DELETE
 
-;(require 'language-mode)
-;(add-to-list 'auto-mode-alist '("\\.lang\\'" . language-mode))
+(require 'language-mode)
+; (add-hook 'org-mode-hook 'language-mode)
+
+; (add-hook 'org-mode 'language-mode)
 
 ;;; Flyspell for Spell Checking
-(require 'flyspell)
-(setq ispell-program-name "aspell")
-(setq flyspell-mark-duplications-flag nil) ; disable duplicate word checking
-(add-hook 'text-mode-hook 'flyspell-mode)
-(add-hook 'flyspell-mode-hook 'flyspell-buffer); check spelling on open
-(define-key flyspell-mode-map (kbd "C-c 7") (lambda () (interactive) (if (region-active-p) (ispell-word) (ispell-buffer))))
-(define-key flyspell-mode-map (kbd "C-g") 'keyboard-quit)
-(fset 'make-flyspell-overlay 'my-make-flyspell-overlay)
-(defun my-make-flyspell-overlay (beg end face mouse-face)
-  "Allocate an overlay to highlight an incorrect word.
-BEG and END specify the range in the buffer of that word.
-FACE and MOUSE-FACE specify the `face' and `mouse-face' properties
-for the overlay."
-  (let ((overlay (make-overlay beg end nil t nil)))
-    (overlay-put overlay 'face face)
-    ; (overlay-put overlay 'mouse-face mouse-face) ; disable word highlighting
-    (overlay-put overlay 'flyspell-overlay t)
-    (overlay-put overlay 'evaporate t)
-    ;; (overlay-put overlay 'help-echo
-    ;;              (lambda (window object pos)
-    ;; 		   (let ((msg "Word not found in dictionary."))
-    ;; 		     (minibuffer-message beg))))
-    ;; 		     ;; (when (and (< beg (point)) (< (point end)))
-    ;; 		     ;;   (minibuffer-message msg)))))
-    (when (eq face 'flyspell-incorrect)
-      (and (stringp flyspell-before-incorrect-word-string)
-           (overlay-put overlay 'before-string
-                        flyspell-before-incorrect-word-string))
-      (and (stringp flyspell-after-incorrect-word-string)
-           (overlay-put overlay 'after-string
-                        flyspell-after-incorrect-word-string)))
-    overlay))
+;; (require 'flyspell)
+;; (setq ispell-program-name "aspell")
+;; (setq flyspell-mark-duplications-flag nil) ; disable duplicate word checking
+;; (add-hook 'text-mode-hook 'flyspell-mode)
+;; (add-hook 'flyspell-mode-hook 'flyspell-buffer); check spelling on open
+;; (define-key flyspell-mode-map (kbd "C-c 7") (lambda () (interactive) (if (region-active-p) (ispell-word) (ispell-buffer))))
+;; (define-key flyspell-mode-map (kbd "C-g") 'keyboard-quit)
+;; (fset 'make-flyspell-overlay 'my-make-flyspell-overlay)
+;; (defun my-make-flyspell-overlay (beg end face mouse-face)
+;;   "Allocate an overlay to highlight an incorrect word.
+;; BEG and END specify the range in the buffer of that word.
+;; FACE and MOUSE-FACE specify the `face' and `mouse-face' properties
+;; for the overlay."
+;;   (let ((overlay (make-overlay beg end nil t nil)))
+;;     (overlay-put overlay 'face face)
+;;     ; (overlay-put overlay 'mouse-face mouse-face) ; disable word highlighting
+;;     (overlay-put overlay 'flyspell-overlay t)
+;;     (overlay-put overlay 'evaporate t)
+;;     ;; (overlay-put overlay 'help-echo
+;;     ;;              (lambda (window object pos)
+;;     ;; 		   (let ((msg "Word not found in dictionary."))
+;;     ;; 		     (minibuffer-message beg))))
+;;     ;; 		     ;; (when (and (< beg (point)) (< (point end)))
+;;     ;; 		     ;;   (minibuffer-message msg)))))
+;;     (when (eq face 'flyspell-incorrect)
+;;       (and (stringp flyspell-before-incorrect-word-string)
+;;            (overlay-put overlay 'before-string
+;;                         flyspell-before-incorrect-word-string))
+;;       (and (stringp flyspell-after-incorrect-word-string)
+;;            (overlay-put overlay 'after-string
+;;                         flyspell-after-incorrect-word-string)))
+;;     overlay))
 
 ;;; Langtool for grammar check
-(require 'langtool)
-(setq langtool-bin "languagetool")
-; (setq langtool-bin "languagetool")
-(setq langtool-default-language "en-US")
-(setq langtool-disabled-rules (list "MORFOLOGIK_RULE_EN_US")) ; disable spell check
-(set-face-attribute 'langtool-correction-face nil :background nil :foreground "black" :weight 'normal)
-;(set-face-attribute 'langtool-errline nil :background "pale green")
-(set-face-attribute 'langtool-errline nil :background nil :underline '(:color "green4" :style wave))
-(add-hook 'text-mode-hook #'langtool-check-buffer-no-interactive) ; check on startup
-(add-hook 'after-save-hook (lambda () (interactive) (when (derived-mode-p 'text-mode) (langtool-check-buffer-no-interactive)))) ; check on save
-(define-key text-mode-map (kbd "C-c 8") #'langtool-check-buffer-with-interactive) ; check and make corrections on command
-(add-hook 'langtool-noerror-hook (lambda () (interactive) (princ "No Grammar Errors.")))
-(fset 'langtool-simple-error-message 'my-langtool-simple-error-message) ; simplify or hush messages
-(defun my-langtool-simple-error-message (overlays)
-  "Textify error messages as long as simple."
-  (mapconcat
-   (lambda (ov)
-     (format
-      "%s [%s]"
-      (overlay-get ov 'langtool-simple-message)
-      (overlay-get ov 'langtool-rule-id)))
-   overlays "\n"))
+;; (require 'langtool)
+;; (setq langtool-bin "languagetool")
+;; ; (setq langtool-bin "languagetool")
+;; (setq langtool-default-language "en-US")
+;; (setq langtool-disabled-rules (list "MORFOLOGIK_RULE_EN_US")) ; disable spell check
+;; (set-face-attribute 'langtool-correction-face nil :background nil :foreground "black" :weight 'normal)
+;; ;(set-face-attribute 'langtool-errline nil :background "pale green")
+;; (set-face-attribute 'langtool-errline nil :background nil :underline '(:color "green4" :style wave))
+;; (add-hook 'text-mode-hook #'langtool-check-buffer-no-interactive) ; check on startup
+;; (add-hook 'after-save-hook (lambda () (interactive) (when (derived-mode-p 'text-mode) (langtool-check-buffer-no-interactive)))) ; check on save
+;; (define-key text-mode-map (kbd "C-c 8") #'langtool-check-buffer-with-interactive) ; check and make corrections on command
+;; (add-hook 'langtool-noerror-hook (lambda () (interactive) (princ "No Grammar Errors.")))
+;; (fset 'langtool-simple-error-message 'my-langtool-simple-error-message) ; simplify or hush messages
+;; (defun my-langtool-simple-error-message (overlays)
+;;   "Textify error messages as long as simple."
+;;   (mapconcat
+;;    (lambda (ov)
+;;      (format
+;;       "%s [%s]"
+;;       (overlay-get ov 'langtool-simple-message)
+;;       (overlay-get ov 'langtool-rule-id)))
+;;    overlays "\n"))
 
-(add-hook 'langtool-error-exists-hook #'langtool-maybe-do-interactive) ;; called when langtool-check-buffer is completed
-(defun langtool-maybe-do-interactive ()
-  (interactive)
-  (when langtool-auto-check (langtool-interactive-correction))
-  (princ ""))
+;; (add-hook 'langtool-error-exists-hook #'langtool-maybe-do-interactive) ;; called when langtool-check-buffer is completed
+;; (defun langtool-maybe-do-interactive ()
+;;   (interactive)
+;;   (when langtool-auto-check (langtool-interactive-correction))
+;;   (princ ""))
 
-(defun langtool-check-buffer-safe ()
-  (interactive)
-  (when (not langtool-buffer-process)
-    (progn (princ "Checking grammar...")
-	   (langtool-check-buffer)
-	   (set-buffer-modified-p nil))))
+;; (defun langtool-check-buffer-safe ()
+;;   (interactive)
+;;   (when (not langtool-buffer-process)
+;;     (progn (princ "Checking grammar...")
+;; 	   (langtool-check-buffer)
+;; 	   (set-buffer-modified-p nil))))
 
-(defun langtool-check-buffer-with-interactive ()
-  (interactive)
-  (if (buffer-modified-p)
-      (progn
-	(langtool-check-buffer-safe)
-	(setq langtool-auto-check t)
-	(princ "")
-	)
-    (progn
-      (langtool-interactive-correction)
-      (princ ""))))
+;; (defun langtool-check-buffer-with-interactive ()
+;;   (interactive)
+;;   (if (buffer-modified-p)
+;;       (progn
+;; 	(langtool-check-buffer-safe)
+;; 	(setq langtool-auto-check t)
+;; 	(princ "")
+;; 	)
+;;     (progn
+;;       (langtool-interactive-correction)
+;;       (princ ""))))
 
-(defun langtool-check-buffer-no-interactive ()
-  (interactive)
-  (setq langtool-auto-check nil)
-  (langtool-check-buffer-safe)
-  (princ ""))
+;; (defun langtool-check-buffer-no-interactive ()
+;;   (interactive)
+;;   (setq langtool-auto-check nil)
+;;   (langtool-check-buffer-safe)
+;;   (princ ""))
 
 ;; ;;; Flycheck with Vale for Linting
-(require 'vale-mode)
-(require 'flycheck)
-(add-hook 'text-mode-hook 'flycheck-mode)
-(setq flycheck-indication-mode nil) ; no red arrow
-(setq flycheck-auto-display-errors-after-checking nil)
-(fset 'flycheck-help-echo (lambda (_window object pos) "")) ;; Disable mouse-over message
-(set-face-attribute 'flycheck-error nil :background nil :underline '(:color "blue" :style wave))
-(setq flycheck-mode-line '(:eval " FlyC"))
+;; (require 'vale-mode)
+;; (require 'flycheck)
+;; (add-hook 'text-mode-hook 'flycheck-mode)
+;; (setq flycheck-indication-mode nil) ; no red arrow
+;; (setq flycheck-auto-display-errors-after-checking nil)
+;; (fset 'flycheck-help-echo (lambda (_window object pos) "")) ;; Disable mouse-over message
+;; (set-face-attribute 'flycheck-error nil :background nil :underline '(:color "blue" :style wave))
+;; (setq flycheck-mode-line '(:eval " FlyC"))
 
-(flycheck-define-checker vale
-  "A checker for prose"
-  :command ("vale" "--output" "line"
-            source)
-  :standard-input nil
-  :error-patterns
-  ((error line-start (file-name) ":" line ":" column ":" (id (one-or-more (not (any ":")))) ":" (message) line-end))
-  :modes (markdown-mode org-mode text-mode)
-  )
-(add-to-list 'flycheck-checkers 'vale 'append)
+;; (flycheck-define-checker vale
+;;   "A checker for prose"
+;;   :command ("vale" "--output" "line"
+;;             source)
+;;   :standard-input nil
+;;   :error-patterns
+;;   ((error line-start (file-name) ":" line ":" column ":" (id (one-or-more (not (any ":")))) ":" (message) line-end))
+;;   :modes (markdown-mode org-mode text-mode)
+;;   )
+;; (add-to-list 'flycheck-checkers 'vale 'append)
 
 ;;; highlight line configuration
 (require 'hl-line)
@@ -241,6 +249,12 @@ for the overlay."
 (setq cua-auto-tabify-rectangles nil) ;; Don't tabify after rectangle commands
 (transient-mark-mode 1) ;; No region when it is not highlighted
 (setq shift-select-mode nil)
+
+;;; Word wrap in every mode and hide in modeline
+(add-hook 'change-major-mode-after-body-hook (lambda () (visual-line-mode 1)))
+(setcar (cdr (assq 'visual-line-mode minor-mode-alist)) "") ; no Mode Line display for word wrap
+
+;;; Hide Buffer-face-mode (increase/decrease text size) in mode line
 
 ;;; configure mouse
 (require 'mouse)
@@ -473,6 +487,10 @@ for the overlay."
   (interactive '("/bin/bash")))
 
 (custom-set-variables
+ ;; custom-set-variables was added by Custom.
+ ;; If you edit it by hand, you could mess it up, so be careful.
+ ;; Your init file should contain only one such instance.
+ ;; If there is more than one, they won't work right.
  '(helm-external-programs-associations
    '(("app" . "open -a")
      ("org")
@@ -495,4 +513,10 @@ for the overlay."
      ("png" . "open -a Preview")
      ("jpeg" . "open -a Preview")))
  '(package-selected-packages
-   '(yaml exec-path-from-shell flycheck-vale helm-flyspell helm-core tuareg helm)))
+   '(org-bullets yaml exec-path-from-shell flycheck-vale helm-flyspell helm-core tuareg helm)))
+(custom-set-faces
+ ;; custom-set-faces was added by Custom.
+ ;; If you edit it by hand, you could mess it up, so be careful.
+ ;; Your init file should contain only one such instance.
+ ;; If there is more than one, they won't work right.
+ )
