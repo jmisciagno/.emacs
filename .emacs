@@ -1,9 +1,5 @@
-;;;;;;;;;;;;;;;;;;;; global ;;;;;;;;;;;;;;;;;;;;;
-
-;;; Debug behavior
-(setq debug-on-error t)
-
 ;;; open Emacs
+(setq debug-on-error t)
 (set-frame-height (selected-frame) 60)
 (set-frame-width (selected-frame) 120)
 (set-frame-position (selected-frame) 315 25)
@@ -12,10 +8,9 @@
 (setq initial-scratch-message "")
 (setq inhibit-startup-message t)
 (setq auto-save-default nil)
-(display-time)
 (fset 'yes-or-no-p 'y-or-n-p)
+(display-time)
 
-;;; Packages
 (require 'package)
 (setq package-archives '(("org"       . "http://orgmode.org/elpa/")
 			 ("gnu"       . "http://elpa.gnu.org/packages/")
@@ -34,25 +29,15 @@
 (add-to-list 'load-path "~/Emacs/writer")
 (add-to-list 'load-path "~/Emacs/language-mode")
 
-
-
-(require 'my-mode)
-(add-hook 'my-mode-hook (lambda () (interactive) (princ "Welcome to My Mode")))
-(add-to-list 'auto-mode-alist '("\\.mine\\'" . my-mode))
-
-;;; Set $PATH
+;;; Set $PATH for shell-commands
 (exec-path-from-shell-initialize)
-
-(require 'writer)
-(add-hook 'org-mode-hook
-	  (lambda ()
-	    (define-key org-mode-map (kbd "C-c w") #'writer-mode)))
 
 ;;; Helm
 (require 'helm)
 (require 'helm-find)
 (require 'helm-command)
 
+(setq helm-use-delayed-cursor nil) ; bug fix?
 (define-key helm-find-files-map (kbd "C-c C-x") nil) ; remove binding
 (global-set-key (kbd "C-x C-f") 'helm-find-files)
 (global-set-key (kbd "M-x") 'helm-M-x)
@@ -92,158 +77,6 @@
 ; Adjust Directory
 (advice-add 'helm-list-directory :filter-return #'helm-filter-files)
 
-;;; Flycheck with Language Tool
-;; (require 'langtool)
-;; (require 'flycheck)
-;; (require 'flycheck-languagetool)
-;; ; (require 'helm-flycheck)
-
-;; (set-face-attribute 'flycheck-error nil :underline (:color "orange" :style wave))
-;; (setq langtool-bin "/usr/local/bin/languagetool")
-;; (setq flycheck-languagetool-server-command "/usr/local/bin/languagetool")
-;; ;(setq langtool-default-language "en-US")
-;; ;(setq langtool-disabled-rules (list "MORFOLOGIK_RULE_EN_US"))
-;; (add-hook 'text-mode-hook 'flycheck-languagetool-setup)
-;; (add-hook 'org-mode-hook 'flycheck-languagetool-setup)
-
-;;; DO NOT DELETE
-;; (require 'helm-flyspell)
-;; (setq ispell-program-name "/usr/local/bin/aspell")
-;; (add-hook 'text-mode-hook 'flyspell-mode)
-;; (add-hook 'flyspell-mode-hook 'flyspell-buffer); check spelling on open
-;; (define-key flyspell-mode-map (kbd "C-c 7") 'helm-flyspell-buffer)
-;; (advice-add 'helm-keyboard-quit :before #'helm-flyspell-quit)
-;; (defun helm-flyspell-quit ()
-;;   (setq helm-flyspell-continue-p nil))
-
-;; (defun helm-flyspell-buffer ()
-;;   (interactive)
-;;   (save-excursion
-;;     (progn
-;;       (setq helm-flyspell-continue-p t)
-;;       (while helm-flyspell-continue-p
-;; 	(progn
-;; 	  (helm-flyspell-correct)
-;; 	  (forward-word)
-;; 	  (when (stringp (flyspell-goto-next-error))
-;; 	        (helm-flyspell-quit)))))))
-;;; DO NOT DELETE
-
-(require 'language-mode)
-; (add-hook 'org-mode-hook 'language-mode)
-
-; (add-hook 'org-mode 'language-mode)
-
-;;; Flyspell for Spell Checking
-;; (require 'flyspell)
-;; (setq ispell-program-name "aspell")
-;; (setq flyspell-mark-duplications-flag nil) ; disable duplicate word checking
-;; (add-hook 'text-mode-hook 'flyspell-mode)
-;; (add-hook 'flyspell-mode-hook 'flyspell-buffer); check spelling on open
-;; (define-key flyspell-mode-map (kbd "C-c 7") (lambda () (interactive) (if (region-active-p) (ispell-word) (ispell-buffer))))
-;; (define-key flyspell-mode-map (kbd "C-g") 'keyboard-quit)
-;; (fset 'make-flyspell-overlay 'my-make-flyspell-overlay)
-;; (defun my-make-flyspell-overlay (beg end face mouse-face)
-;;   "Allocate an overlay to highlight an incorrect word.
-;; BEG and END specify the range in the buffer of that word.
-;; FACE and MOUSE-FACE specify the `face' and `mouse-face' properties
-;; for the overlay."
-;;   (let ((overlay (make-overlay beg end nil t nil)))
-;;     (overlay-put overlay 'face face)
-;;     ; (overlay-put overlay 'mouse-face mouse-face) ; disable word highlighting
-;;     (overlay-put overlay 'flyspell-overlay t)
-;;     (overlay-put overlay 'evaporate t)
-;;     ;; (overlay-put overlay 'help-echo
-;;     ;;              (lambda (window object pos)
-;;     ;; 		   (let ((msg "Word not found in dictionary."))
-;;     ;; 		     (minibuffer-message beg))))
-;;     ;; 		     ;; (when (and (< beg (point)) (< (point end)))
-;;     ;; 		     ;;   (minibuffer-message msg)))))
-;;     (when (eq face 'flyspell-incorrect)
-;;       (and (stringp flyspell-before-incorrect-word-string)
-;;            (overlay-put overlay 'before-string
-;;                         flyspell-before-incorrect-word-string))
-;;       (and (stringp flyspell-after-incorrect-word-string)
-;;            (overlay-put overlay 'after-string
-;;                         flyspell-after-incorrect-word-string)))
-;;     overlay))
-
-;;; Langtool for grammar check
-;; (require 'langtool)
-;; (setq langtool-bin "languagetool")
-;; ; (setq langtool-bin "languagetool")
-;; (setq langtool-default-language "en-US")
-;; (setq langtool-disabled-rules (list "MORFOLOGIK_RULE_EN_US")) ; disable spell check
-;; (set-face-attribute 'langtool-correction-face nil :background nil :foreground "black" :weight 'normal)
-;; ;(set-face-attribute 'langtool-errline nil :background "pale green")
-;; (set-face-attribute 'langtool-errline nil :background nil :underline '(:color "green4" :style wave))
-;; (add-hook 'text-mode-hook #'langtool-check-buffer-no-interactive) ; check on startup
-;; (add-hook 'after-save-hook (lambda () (interactive) (when (derived-mode-p 'text-mode) (langtool-check-buffer-no-interactive)))) ; check on save
-;; (define-key text-mode-map (kbd "C-c 8") #'langtool-check-buffer-with-interactive) ; check and make corrections on command
-;; (add-hook 'langtool-noerror-hook (lambda () (interactive) (princ "No Grammar Errors.")))
-;; (fset 'langtool-simple-error-message 'my-langtool-simple-error-message) ; simplify or hush messages
-;; (defun my-langtool-simple-error-message (overlays)
-;;   "Textify error messages as long as simple."
-;;   (mapconcat
-;;    (lambda (ov)
-;;      (format
-;;       "%s [%s]"
-;;       (overlay-get ov 'langtool-simple-message)
-;;       (overlay-get ov 'langtool-rule-id)))
-;;    overlays "\n"))
-
-;; (add-hook 'langtool-error-exists-hook #'langtool-maybe-do-interactive) ;; called when langtool-check-buffer is completed
-;; (defun langtool-maybe-do-interactive ()
-;;   (interactive)
-;;   (when langtool-auto-check (langtool-interactive-correction))
-;;   (princ ""))
-
-;; (defun langtool-check-buffer-safe ()
-;;   (interactive)
-;;   (when (not langtool-buffer-process)
-;;     (progn (princ "Checking grammar...")
-;; 	   (langtool-check-buffer)
-;; 	   (set-buffer-modified-p nil))))
-
-;; (defun langtool-check-buffer-with-interactive ()
-;;   (interactive)
-;;   (if (buffer-modified-p)
-;;       (progn
-;; 	(langtool-check-buffer-safe)
-;; 	(setq langtool-auto-check t)
-;; 	(princ "")
-;; 	)
-;;     (progn
-;;       (langtool-interactive-correction)
-;;       (princ ""))))
-
-;; (defun langtool-check-buffer-no-interactive ()
-;;   (interactive)
-;;   (setq langtool-auto-check nil)
-;;   (langtool-check-buffer-safe)
-;;   (princ ""))
-
-;; ;;; Flycheck with Vale for Linting
-;; (require 'vale-mode)
-;; (require 'flycheck)
-;; (add-hook 'text-mode-hook 'flycheck-mode)
-;; (setq flycheck-indication-mode nil) ; no red arrow
-;; (setq flycheck-auto-display-errors-after-checking nil)
-;; (fset 'flycheck-help-echo (lambda (_window object pos) "")) ;; Disable mouse-over message
-;; (set-face-attribute 'flycheck-error nil :background nil :underline '(:color "blue" :style wave))
-;; (setq flycheck-mode-line '(:eval " FlyC"))
-
-;; (flycheck-define-checker vale
-;;   "A checker for prose"
-;;   :command ("vale" "--output" "line"
-;;             source)
-;;   :standard-input nil
-;;   :error-patterns
-;;   ((error line-start (file-name) ":" line ":" column ":" (id (one-or-more (not (any ":")))) ":" (message) line-end))
-;;   :modes (markdown-mode org-mode text-mode)
-;;   )
-;; (add-to-list 'flycheck-checkers 'vale 'append)
-
 ;;; highlight line configuration
 (require 'hl-line)
 (setq cursor-type nil)
@@ -282,22 +115,22 @@
 (require 'maxframe)
 (defvar my-fullscreen-p t "Check if fullscreen is on or off")
 
-(defun my-toggle-fullscreen ()
-  (interactive)
-  (setq my-fullscreen-p (not my-fullscreen-p))
-  (if my-fullscreen-p
-	  (restore-frame)
-	(maximize-frame)))
-
-(defun close-all-buffers ()
-  (interactive)
-  (mapc 'kill-buffer (buffer-list)))
-
-;;; Buffer commands
+;;; Emacs commands
+(global-set-key (kbd "C-x C-c") 'soft-quit-emacs) ; replace kill-emacs with soft-quit
+(global-set-key (kbd "C-c C-c") 'toggle-comment)
+(global-set-key (kbd "C-x u") nil) ; unbind
+(global-set-key (kbd "C-d") 'describe-key)
+;(global-set-key (kbd "C-x <left>") (lambda ()(interactive) (my-other-window -1)))
+;(global-set-key (kbd "C-x <right>") (lambda () (interactive (my-other-window 1))))
+;(global-set-key (kbd "C-x <down>") 'next-buffer)  ;; intentionally swapped with C-x <right>
+;(global-set-key (kbd "C-x <up>") 'previous-buffer)
+(global-set-key (kbd "C-x 3") 'my-split-window-horizontally)
+(global-set-key (kbd "C-x 2") 'my-split-window-vertically)
 (global-set-key (kbd "C-x C-m") 'toggle-frame-fullscreen)
 (global-set-key (kbd "C-x SPC") 'minibuffer-complete-word)
-
 (global-set-key (kbd "ESC <up>") 'beginning-of-buffer)
+(global-set-key (kbd "C-c p") 'previous-buffer)  ;; intentionally swapped with C-x <right>
+(global-set-key (kbd "C-c n") 'next-buffer)  ;; intentionally swapped with C-x <right>
 (global-set-key (kbd "C-p") 'previous-line_)
 (global-set-key (kbd "C-n") 'next-line_)
 (global-set-key (kbd "M-p") 'beginning-of-buffer)
@@ -305,35 +138,39 @@
 (global-set-key (kbd "C-k") 'kill-whole-line)
 (global-set-key (kbd "C-l") 'select-current-line)
 (global-set-key (kbd "C-w") 'select-current-word)
-(global-set-key (kbd "C-x C-K") 'close-all-buffers)
+(global-set-key (kbd "C-x C-K") 'kill-all-buffers)
+(global-set-key (kbd "C-x p") (lambda () (interactive (my-other-window -1))))
+(global-set-key (kbd "C-x n") (lambda () (interactive (my-other-window 1))))
 (global-set-key (kbd "M-y") (lambda nil (interactive)(insert "λ")))
 (global-set-key (kbd "M-.") (lambda nil (interactive)(insert "∘")))
 (global-set-key (kbd "M-*") (lambda nil (interactive)(insert "×")))
 (global-set-key (kbd "M-j") (lambda nil (interactive)(insert "Δ")))
-
 (global-set-key (kbd "C-=") 'text-scale-increase)
 (global-set-key (kbd "C--") 'text-scale-decrease)
+
+(defun my-toggle-fullscreen ()
+  (interactive)
+  (setq my-fullscreen-p (not my-fullscreen-p))
+  (if my-fullscreen-p
+	  (restore-frame)
+	(maximize-frame)))
+
+(defun kill-all-buffers ()
+  (interactive)
+  (mapc 'kill-buffer (buffer-list)))
+
+(defun soft-quit-emacs ()
+  (interactive)
+  (kill-all-buffers)
+  (ns-do-hide-emacs)
+  (load-file user-init-file)
+  (princ ""))
 
 (defun toggle-comment ()
   "comment or uncomment current line"
   (interactive)
   (setq toggle-comment 'comment-or-uncomment-region)
   (call-interactively toggle-comment))
-
-;;; Emacs commands
-(global-set-key (kbd "C-c C-c") 'toggle-comment)
-(global-set-key (kbd "C-x u") nil)
-(global-set-key (kbd "C-d") 'describe-key)
-;(global-set-key (kbd "C-x <left>") (lambda ()(interactive) (my-other-window -1)))
-;(global-set-key (kbd "C-x <right>") (lambda () (interactive (my-other-window 1))))
-(global-set-key (kbd "C-x p") (lambda () (interactive (my-other-window -1))))
-(global-set-key (kbd "C-x n") (lambda () (interactive (my-other-window 1))))
-(global-set-key (kbd "C-c p") 'previous-buffer)  ;; intentionally swapped with C-x <right>
-(global-set-key (kbd "C-c n") 'next-buffer)  ;; intentionally swapped with C-x <right>
-;(global-set-key (kbd "C-x <down>") 'next-buffer)  ;; intentionally swapped with C-x <right>
-;(global-set-key (kbd "C-x <up>") 'previous-buffer)
-(global-set-key (kbd "C-x 3") 'my-split-window-horizontally)
-(global-set-key (kbd "C-x 2") 'my-split-window-vertically)
 
 (defun my-other-window (x)
   (interactive)
@@ -397,12 +234,26 @@
    (shell-command (concat "open " (read-from-minibuffer "Find file: "))))
 
 ;;; Org Mode
+(setq org-export-with-toc nil)
+(setq org-export-with-section-numbers nil)
 (setq org-startup-latex-with-latex-preview t)
 (add-to-list 'auto-mode-alist '("\\.org\\'" . org-mode))
 
+(require 'language-mode)
+(add-hook 'org-mode-hook
+	  (lambda ()
+	    (define-key org-mode-map (kbd "C-c l") #'language-mode)))
+
+(require 'writer)
+(add-hook 'org-mode-hook
+	  (lambda ()
+	    (define-key org-mode-map (kbd "C-c w") #'writer-mode)))
+
 ;;; Emacs Lisp Mode
 (add-to-list 'auto-mode-alist '("\\.emacs\\'" . emacs-lisp-mode))
+(add-to-list 'auto-mode-alist '("\\.el\\'" . emacs-lisp-mode))
 (add-hook 'emacs-lisp-mode-hook (lambda () (define-key emacs-lisp-mode-map (kbd "C-c e") 'eval-buffer)))
+(add-hook 'emacs-lisp-mode-hook (lambda () (define-key emacs-lisp-mode-map (kbd "M-e") 'eval-expression)))
 
 ;;; HTML Mode 
 (defun html-eval ()
@@ -478,21 +329,11 @@
 
 ;;;;;;;;;;;;;;;;;;;;;;; Bash ;;;;;;;;;;;;;;;;;;;;;;;;
 (global-set-key (kbd "C-x b") 'shell)
-(global-set-key (kbd "M-e") 'shell-command)
 (set-terminal-coding-system 'utf-8)
 (set-keyboard-coding-system 'utf-8)
 (prefer-coding-system 'utf-8)
 
-; Fix Kill-Emacs
-(defun kill-emacs-fix ()
-  (interactive)
-  (when (get-buffer "*shell*") (kill-buffer "*shell*"))
-  (save-buffers-kill-terminal))
-
-(global-set-key (kbd "C-x C-c") 'kill-emacs-fix)
-
-;;; prevent prompt for which shell to open
-(defadvice my-ansi-term (before force-bash)
+(defadvice my-ansi-term (before force-bash) ; Force bash
   (interactive '("/bin/bash")))
 
 (custom-set-variables
